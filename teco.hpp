@@ -215,8 +215,15 @@ public:
         
 		for (int line = 0; line < source.symbols.size(); line++) {
             for (int column = 0; column < source.symbols[line].size(); column++) {
-                if (source.symbols[line][column] != ' ')
-				    symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
+                int target_line = line + sprite.y;
+                int target_column = column + sprite.x;
+                if (target_line >= 0 && target_line < HEIGHT_IN_SYMBOLS && 
+                    target_column >= 0 && target_column < WIDTH_IN_SYMBOLS) {
+                    if (source.symbols[line][column] != ' ')
+                        symbols[target_line][target_column] = source.symbols[line][column];
+                }
+                // if (source.symbols[line][column] != ' ')
+				//     symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
 			}
 		}
     }

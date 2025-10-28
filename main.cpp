@@ -1,5 +1,6 @@
 #include "teco.hpp"
 #include <random>
+#include <ctime>
 
 enum {
     BULB = 0,
@@ -17,74 +18,96 @@ int ITEM_HEIGHT_IN_SYMBOLS = 6;
 int SHIP_WIDTH_IN_SYMBOLS = 14;
 int SHIP_HEIGHT_IN_SYMBOLS = 5;
 
-int SEA_HEIGHT_IN_SYMBOLS = 48;
+const int HARBOR_X = 1;
+const int HARBOR_Y = 1;
+
+const int SEA_HEIGHT_IN_SYMBOLS = 42;
+const int SEA_WIDTH_IN_SYMBOLS = 192;
+
+const int SEA_X_IN_SYMBOLS = 1;
+const int SEA_Y_IN_SYMBOLS = 1;
+
 int HOTBAR_HEIGHT_IN_SYMBOLS = teco::HEIGHT_IN_SYMBOLS - SEA_HEIGHT_IN_SYMBOLS;
 
 std::vector<int> hotbar;
 
 class Ship {
 public:
-    // teco::Sprite sprite = teco::Sprite {
-    //     0, 0,
-    //     std::vector<teco::Animation> {
-    //         teco::Animation {
-    //             std::vector<teco::Source> {
-    //                 teco::Source {
-    //                     "./assets/sources/ships/schooner/right/df.tcsb",
-    //                     "./assets/sources/empty.tccl"
-    //                 }
-    //             }
-    //         }
-    //     },
-    //     0
-    // };
+    teco::Sprite *sprite;
     
-    // int is_turned_right = 0;
-    // float speed_x;
-    // float speed_y;
-    // float x = 0;
-    // float y = 0;
+    int is_turned_right = 0;
 
-    // bool is_wrangled = false;
+    float speed_x;
+    float speed_y;
+    float speed;
+
+    float x = 0;
+    float y = 0;
+
+    int left_point_y;
+    int right_point_y;
+
+    bool is_wrangled = false;
 
     Ship() {
-        // is_turned_right = rand() % 2;
+        sprite = new teco::Sprite {
+            0, 0,
+            std::vector<teco::Animation> {
+                teco::Animation {
+                    std::vector<teco::Source> {
+                        teco::Source {
+                            "./assets/sources/ships/schooner/left/df.tcsb",
+                            "./assets/sources/empty.tccl"
+                        }
+                    }
+                },
+                teco::Animation {
+                    std::vector<teco::Source> {
+                        teco::Source {
+                            "./assets/sources/ships/schooner/right/df.tcsb",
+                            "./assets/sources/empty.tccl"
+                        }
+                    }
+                }
+            },
+            0
+        };
 
-        // speed_y = rand() % 100 - 50;
-        // speed_y /= 100;
+        left_point_y = SEA_Y_IN_SYMBOLS + rand() % SEA_HEIGHT_IN_SYMBOLS;
+        right_point_y = SEA_Y_IN_SYMBOLS + rand() % SEA_HEIGHT_IN_SYMBOLS;
 
-        // speed_x = rand() % 100;
-        // speed_x /= 50;
+        speed = rand() % 100 + 50;
+        speed /= 150;
 
-        // y = rand() % SEA_HEIGHT_IN_SYMBOLS;
+        float speed_coefficent = speed / hypot(left_point_y - right_point_y, SEA_WIDTH_IN_SYMBOLS);
 
-        // if (is_turned_right) {
-        //     sprite.animations[0].sources[0].load_symbols("assets/sources/ships/schooner/right/df.tcsb");
-        // } else {
-        //     sprite.animations[0].sources[0].load_symbols("assets/sources/ships/schooner/left/df.tcsb");
-        //     speed_x = -speed_x;
-        //     x = teco::WIDTH_IN_SYMBOLS * 4;
-        // }
+        speed_y = (right_point_y - left_point_y) * speed_coefficent;
+        speed_x = (SEA_WIDTH_IN_SYMBOLS) * speed_coefficent;
 
-        // y = 20;
-        // x = 80;
+        is_turned_right = rand() % 2;
+
+        if (is_turned_right) {
+            sprite->play_animation(1);
+            y = left_point_y;
+            x = SEA_X_IN_SYMBOLS - SHIP_WIDTH_IN_SYMBOLS;
+        } else {
+            sprite->play_animation(0);
+            speed_x = -speed_x;
+            speed_y = -speed_y;
+            y = right_point_y;
+            x = SEA_X_IN_SYMBOLS + SEA_WIDTH_IN_SYMBOLS;
+        }
     }
 
-    // void tick() {
-    //     // if (!is_wrangled) {
-    //     //     x += speed_x;
-    //     //     y += speed_y;
-    //     // }
+    void tick() {
+        if (!is_wrangled) {
+            x += speed_x;
+            y += speed_y;
+        }
 
-    //     // std::cout << speed_x << std::endl;
-    //     // std::cout << speed_y << std::endl;
-
-    //     // sprite.x = 20;
-    //     // sprite.y = 80;
-
-    //     // std::cout << sprite.x << std::endl;
-    //     // std::cout << sprite.y << std::endl;
-    // }
+        sprite->x = x;
+        sprite->y = y;
+    }
 };
 
 class Item {
@@ -159,22 +182,7 @@ teco::Sprite waves = teco::Sprite {
                 }
             },
             teco::LOOPING,
-            3
-        }
-    },
-    0
-};
-
-teco::Sprite ship = teco::Sprite {
-    12, 10,
-    std::vector<teco::Animation> {
-        teco::Animation {
-            std::vector<teco::Source> {
-                teco::Source {
-                    "./assets/sources/ships/schooner/right/df.tcsb",
-                    "./assets/sources/empty.tccl"
-                }
-            }
+            4
         }
     },
     0
@@ -184,22 +192,19 @@ void tick_tock() {
     if (teco::is_key_pressed(SDLK_BACKSPACE))
         teco::exit();
 
-    ship.x++;
-
-    // for (Ship *ship : ships) {
-    //     ship->tick();
-    // }
+    for (Ship *ship : ships) {
+        ship->tick();
+    }
 }
 
 int main() {
-    srand(100);
+    srand(time(0));
 
     teco::init(tick_tock, teco::TUI, 60, 20, 8);
 
-    // for (int ship_index = 0; ship_index < 1; ship_index++){
-    //     Ship ship = Ship {};`
-    //     ships.push_back(&ship);
-    // }
+    for (int ship_index = 0; ship_index < 1; ship_index++){
+        ships.push_back(new Ship{});
+    }
 
     teco::mainloop();
     return 0;
