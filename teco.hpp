@@ -98,8 +98,8 @@ TTF_Font *font = NULL;
 SDL_Color text_color = {229, 229, 229};
 SDL_Texture *text_texture = NULL;
 
-SDL_Texture *textures[20];
-char symbols_to_prepare_textures_from_them[] = "+-_()'\"=|\\/";
+SDL_Texture *textures[32];
+char symbols_to_prepare_textures_from_them[] = "+-_()'\"=|\\/~#$%&^*.,;:";
 
 // classes
 class Source {
@@ -157,7 +157,7 @@ public:
     int layer;
     int current_animation_index = 0;
     int current_frame_index = 0;
-    bool is_playing_animations;
+    bool is_playing_animations = true;
     int current_tick = 0;
 
     Sprite() {};
@@ -215,7 +215,15 @@ public:
         
 		for (int line = 0; line < source.symbols.size(); line++) {
             for (int column = 0; column < source.symbols[line].size(); column++) {
-				symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
+                int target_line = line + sprite.y;
+                int target_column = column + sprite.x;
+                if (target_line >= 0 && target_line < HEIGHT_IN_SYMBOLS && 
+                    target_column >= 0 && target_column < WIDTH_IN_SYMBOLS) {
+                    if (source.symbols[line][column] != ' ')
+                        symbols[target_line][target_column] = source.symbols[line][column];
+                }
+                // if (source.symbols[line][column] != ' ')
+				//     symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
 			}
 		}
     }
@@ -363,7 +371,7 @@ void draw() {
 
 	for (int line = 0; line < teco::HEIGHT_IN_SYMBOLS; line++) {
 		for (int column = 0; column < teco::WIDTH_IN_SYMBOLS; column++) {
-			if (screen.symbols[line][column] != ' ' and screen.symbols[line][column] != '\t') {
+			if (screen.symbols[line][column] != ' ') {
                 current_symbol[0] = screen.symbols[line][column];
                 if (strstr(symbols_to_prepare_textures_from_them, current_symbol)) {
                     const char *ptr = strchr(symbols_to_prepare_textures_from_them, screen.symbols[line][column]);
