@@ -162,7 +162,7 @@ public:
 
     Sprite() {};
 
-    Sprite(int, int, std::vector<Animation>, int);
+    Sprite(int, int, std::vector<Animation>);
 
     void play_animation(int animation_index) {
         if (animation_index != current_animation_index) {
@@ -198,7 +198,7 @@ public:
 
 std::vector<Sprite*> sprites;
 
-Sprite::Sprite(int _x, int _y, std::vector<Animation> _animations, int _default_animation_index = 0) {
+Sprite::Sprite(int _x, int _y, std::vector<Animation> _animations) {
     x = _x;
     y = _y;
     animations = _animations;

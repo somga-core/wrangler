@@ -2,25 +2,71 @@
 #include <random>
 
 enum {
-    BULB = 0,
+	NOTHING,
+    BULB,
     GLASSES,
     LENS,
-    MONSTER
+    MONSTER,
+	ITEMS_COUNT
 };
 
-int ITEMS_COUNT = 4;
-int HOTBAR_WIDTH_IN_ITEMS = 10;
+const int HOTBAR_WIDTH_IN_ITEMS = 10;
 
-int ITEM_WIDTH_IN_SYMBOLS = 16;
-int ITEM_HEIGHT_IN_SYMBOLS = 6;
+const int ITEM_WIDTH_IN_SYMBOLS = 16;
+const int ITEM_HEIGHT_IN_SYMBOLS = 6;
 
-int SHIP_WIDTH_IN_SYMBOLS = 14;
-int SHIP_HEIGHT_IN_SYMBOLS = 5;
+const int SHIP_WIDTH_IN_SYMBOLS = 14;
+const int SHIP_HEIGHT_IN_SYMBOLS = 5;
 
-int SEA_HEIGHT_IN_SYMBOLS = 48;
-int HOTBAR_HEIGHT_IN_SYMBOLS = teco::HEIGHT_IN_SYMBOLS - SEA_HEIGHT_IN_SYMBOLS;
+const int SEA_HEIGHT_IN_SYMBOLS = 48;
+const int HOTBAR_HEIGHT_IN_SYMBOLS = teco::HEIGHT_IN_SYMBOLS - SEA_HEIGHT_IN_SYMBOLS;
+
+int position_in_hotbar = 0;
 
 std::vector<int> hotbar;
+
+teco::Sprite background = teco::Sprite {
+    0, 0,
+    std::vector<teco::Animation> {
+        teco::Animation {
+            std::vector<teco::Source> {
+                teco::Source {
+                    "./assets/sources/gui/background/df.tcsb",
+                    "./assets/sources/empty.tccl"
+                }
+            }
+        }
+    }
+};
+
+teco::Sprite hand {
+	1, 48,
+	std::vector<teco::Animation> {
+		teco::Animation {
+			std::vector<teco::Source> {
+				teco::Source {
+					"assets/sources/gui/hand.tcsb",
+					"assets/sources/gui/hand.tccl"
+				}
+			}
+		}
+	}
+};
+
+teco::Sprite ship = teco::Sprite {
+    12, 10,
+    std::vector<teco::Animation> {
+        teco::Animation {
+            std::vector<teco::Source> {
+                teco::Source {
+                    "./assets/sources/ships/schooner/right/df.tcsb",
+                    "./assets/sources/empty.tccl"
+                }
+            }
+        }
+    }
+};
+
 
 class Ship {
 public:
@@ -87,6 +133,8 @@ public:
     // }
 };
 
+std::vector<Ship*> ships;
+
 class Item {
 
 };
@@ -99,41 +147,32 @@ class LightBeam {
 
 };
 
-std::vector<Ship*> ships;
-
-teco::Sprite background = teco::Sprite {
-    0, 0,
-    std::vector<teco::Animation> {
-        teco::Animation {
-            std::vector<teco::Source> {
-                teco::Source {
-                    "./assets/sources/gui/background/df.tcsb",
-                    "./assets/sources/empty.tccl"
-                }
-            }
+void process_key_presses() {
+    if (teco::is_key_pressed(SDLK_BACKSPACE)) {
+        teco::exit();
+	}
+    else if (teco::is_key_pressed(SDLK_q) and position_in_hotbar < HOTBAR_WIDTH_IN_ITEMS) {
+        position_in_hotbar++;
+    }
+    else if (teco::is_key_pressed(SDLK_e) and position_in_hotbar > 0) {
+        position_in_hotbar--;
+    }
+    else if (teco::is_key_pressed(SDLK_f) and hotbar[position_in_hotbar] != NOTHING) {
+        switch (hotbar[position_in_hotbar]) {
+            case BULB:
+                break;
+            case GLASSES:
+                break;
+            case LENS:
+                break;
+            case MONSTER:
+                break;
         }
-    },
-    0
-};
-
-teco::Sprite ship = teco::Sprite {
-    12, 10,
-    std::vector<teco::Animation> {
-        teco::Animation {
-            std::vector<teco::Source> {
-                teco::Source {
-                    "./assets/sources/ships/schooner/right/df.tcsb",
-                    "./assets/sources/empty.tccl"
-                }
-            }
-        }
-    },
-    0
-};
+    }
+}
 
 void tick_tock() {
-    if (teco::is_key_pressed(SDLK_BACKSPACE))
-        teco::exit();
+	process_key_presses();
 
     ship.x++;
 
