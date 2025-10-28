@@ -84,8 +84,6 @@ int graphics_type;
 std::vector<int> pressed_keys;
 
 bool run = true;
-
-int layer_count;
   
 int window_width = STANDARD_WINDOW_WIDTH;
 int window_height = STANDARD_WINDOW_HEIGHT;
@@ -99,6 +97,9 @@ SDL_Surface *text_surface = NULL;
 TTF_Font *font = NULL;
 SDL_Color text_color = {229, 229, 229};
 SDL_Texture *text_texture = NULL;
+
+SDL_Texture *textures[20];
+char symbols_to_prepare_textures_from_them[] = "+-_()'\"=|\\/";
 
 // classes
 class Source {
@@ -159,6 +160,8 @@ public:
     bool is_playing_animations;
     int current_tick = 0;
 
+    Sprite() {};
+
     Sprite(int, int, std::vector<Animation>, int);
 
     void play_animation(int animation_index) {
@@ -193,14 +196,14 @@ public:
     }
 };
 
-std::vector<Sprite> sprites;
+std::vector<Sprite*> sprites;
 
 Sprite::Sprite(int _x, int _y, std::vector<Animation> _animations, int _default_animation_index = 0) {
     x = _x;
     y = _y;
     animations = _animations;
     
-    sprites.push_back(*this);
+    sprites.push_back(this);
 }
 
 class Screen {
@@ -208,10 +211,10 @@ public:
 	char symbols[HEIGHT_IN_SYMBOLS][WIDTH_IN_SYMBOLS];
 
 	void add_sprite_sp(Sprite sprite) {
-		Source source = sprite.animations[sprite.current_animation_index].sources[sprite.current_frame_index];
-
+        Source source = sprite.animations[sprite.current_animation_index].sources[sprite.current_frame_index];
+        
 		for (int line = 0; line < source.symbols.size(); line++) {
-			for (int column = 0; column < source.symbols[line].size(); column++) {
+            for (int column = 0; column < source.symbols[line].size(); column++) {
 				symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
 			}
 		}
@@ -272,13 +275,27 @@ void init(void (*_tick_function) (), int _graphics_type = TUI, int _fps = 60, in
     SDL_SetRenderDrawColor(renderer, STANDARD_BACKGROUND_RED, STANDARD_BACKGROUND_GREEN, STANDARD_BACKGROUND_BLUE, 0x00);
 
 	Screen screen;
+
+    char temp_char[2];
+    temp_char[1] = '\0';
+
+    for (int symbol_index = 0; symbol_index < strlen(symbols_to_prepare_textures_from_them); symbol_index++) {
+        temp_char[0] = symbols_to_prepare_textures_from_them[symbol_index];
+        text_surface = TTF_RenderText_Solid(font, temp_char, text_color);
+        textures[symbol_index] = SDL_CreateTextureFromSurface(
+            renderer,
+            text_surface
+        );
+        SDL_FreeSurface(text_surface);
+    }
 }
+
 
 void tick() {
     tick_function();
     tick_counter++;
     for (auto sprite : sprites) {
-		sprite.update_animations();
+		sprite->update_animations();
     }
 }
 
@@ -338,7 +355,7 @@ void draw() {
     screen.clear();
 
 	for (auto sprite : sprites) {
-        screen.add_sprite_sp(sprite);
+        screen.add_sprite_sp(*sprite);
     }
 
 	char current_symbol[2];
@@ -346,19 +363,32 @@ void draw() {
 
 	for (int line = 0; line < teco::HEIGHT_IN_SYMBOLS; line++) {
 		for (int column = 0; column < teco::WIDTH_IN_SYMBOLS; column++) {
-			if (screen.symbols[line][column] != ' ') {
-				current_symbol[0] = screen.symbols[line][column];
-				text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
-				text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-				SDL_FreeSurface(text_surface);
-				SDL_Rect text_rectangle = {
-					column*window_width/WIDTH_IN_SYMBOLS,
-					line*window_height/HEIGHT_IN_SYMBOLS,
-					window_width/WIDTH_IN_SYMBOLS, 
-					window_height/HEIGHT_IN_SYMBOLS
-				};
-				SDL_RenderCopy(renderer, text_texture, NULL, &text_rectangle);
-				SDL_DestroyTexture(text_texture);
+			if (screen.symbols[line][column] != ' ' and screen.symbols[line][column] != '\t') {
+                current_symbol[0] = screen.symbols[line][column];
+                if (strstr(symbols_to_prepare_textures_from_them, current_symbol)) {
+                    const char *ptr = strchr(symbols_to_prepare_textures_from_them, screen.symbols[line][column]);
+                    int index = ptr - symbols_to_prepare_textures_from_them;
+
+                    SDL_Rect text_rectangle = {
+                        column*window_width/WIDTH_IN_SYMBOLS,
+                        line*window_height/HEIGHT_IN_SYMBOLS,
+                        window_width/WIDTH_IN_SYMBOLS, 
+                        window_height/HEIGHT_IN_SYMBOLS
+                    };
+                    SDL_RenderCopy(renderer, textures[index], NULL, &text_rectangle);
+                } else {
+                    text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
+                    text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+                    SDL_FreeSurface(text_surface);
+                    SDL_Rect text_rectangle = {
+                        column*window_width/WIDTH_IN_SYMBOLS,
+                        line*window_height/HEIGHT_IN_SYMBOLS,
+                        window_width/WIDTH_IN_SYMBOLS, 
+                        window_height/HEIGHT_IN_SYMBOLS
+                    };
+                    SDL_RenderCopy(renderer, text_texture, NULL, &text_rectangle);
+                    SDL_DestroyTexture(text_texture);
+                }
 			}
 		}
 	}
