@@ -116,6 +116,55 @@ teco::Sprite background = teco::Sprite {
     0
 };
 
+teco::Sprite waves = teco::Sprite {
+    1, 1,
+    std::vector<teco::Animation> {
+        teco::Animation {
+            std::vector<teco::Source> {
+                teco::Source {
+                    "./assets/sources/gui/waves/df1.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df2.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df3.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df4.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df5.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df6.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df7.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df8.tcsb",
+                    "./assets/sources/empty.tccl"
+                },
+                teco::Source {
+                    "./assets/sources/gui/waves/df9.tcsb",
+                    "./assets/sources/empty.tccl"
+                }
+            },
+            teco::LOOPING,
+            3
+        }
+    },
+    0
+};
+
 teco::Sprite ship = teco::Sprite {
     12, 10,
     std::vector<teco::Animation> {
