@@ -7,7 +7,7 @@ enum {
     BULB,
     GLASSES,
     LENS,
-    MONSTER,
+    CHUDISHCHE,
 	ITEMS_COUNT
 };
 
@@ -31,7 +31,7 @@ const int SEA_Y_IN_SYMBOLS = 1;
 const int HOTBAR_HEIGHT_IN_SYMBOLS = teco::HEIGHT_IN_SYMBOLS - SEA_HEIGHT_IN_SYMBOLS;
 int position_in_hotbar = 0;
 
-std::vector<int> hotbar;
+int hotbar[HOTBAR_WIDTH_IN_ITEMS] = {0, 0, 1, 2, 1, 0};
 
 teco::Sprite background = teco::Sprite {
     0, 0,
@@ -176,6 +176,10 @@ public:
         }
     }
 
+	~Ship() {
+		delete sprite;
+	}
+
     void tick() {
         if (!is_wrangled) {
             x += speed_x;
@@ -190,8 +194,111 @@ public:
 std::vector<Ship*> ships;
 
 class Item {
+public:
+	teco::Sprite *sprite;
+	int type;
+	
+	Item(int);
 
+	void change(int _type) {
+		type = _type;
+		switch (type) {
+			case NOTHING:
+				sprite->animations = std::vector<teco::Animation> {
+					teco::Animation {
+						std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/empty.tcsb",
+							"assets/sources/empty.tccl"
+							}
+						}
+					}
+				};
+				break;
+			case BULB:
+				sprite->animations = std::vector<teco::Animation> {
+					teco::Animation {
+						std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/gui/hand.tcsb",
+							"assets/sources/gui/hand.tccl"
+							}
+						}
+					}
+				};
+				break;
+			case GLASSES:
+				sprite->animations = std::vector<teco::Animation> {
+					teco::Animation {
+						std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/gui/hand.tcsb",
+							"assets/sources/gui/hand.tccl"
+							}
+						}
+					}
+				};
+				break;
+			case LENS:
+				sprite->animations = std::vector<teco::Animation> {
+					teco::Animation {
+						std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/gui/hand.tcsb",
+							"assets/sources/gui/hand.tccl"
+							}
+						}
+					}
+				};
+				break;
+			case CHUDISHCHE:
+				sprite->animations = std::vector<teco::Animation> {
+					teco::Animation {
+						std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/gui/hand.tcsb",
+							"assets/sources/gui/hand.tccl"
+							}
+						}
+					}
+				};
+				break;
+		}
+	}
+
+	~Item() {
+		delete sprite;
+	}
 };
+
+Item *item_sprites[HOTBAR_WIDTH_IN_ITEMS] = {
+	new Item(0),
+	new Item(1),
+	new Item(2),
+	new Item(3),
+	new Item(4),
+	new Item(5),
+	new Item(6),
+	new Item(7),
+	new Item(8),
+	new Item(9),
+};
+
+Item::Item(int item_index) {
+	sprite = new teco::Sprite {
+		1 + 17*item_index, 48,
+		std::vector<teco::Animation> {
+			teco::Animation {
+				std::vector<teco::Source> {
+					teco::Source {
+						"assets/sources/empty.tcsb",
+						"assets/sources/empty.tccl"
+					}
+				}
+			}
+		}
+	};
+}
 
 class Background {
 
@@ -205,11 +312,11 @@ void process_key_presses() {
     if (teco::is_key_pressed(SDLK_BACKSPACE)) {
         teco::exit();
 	}
-    else if (teco::is_key_pressed(SDLK_q) and position_in_hotbar < HOTBAR_WIDTH_IN_ITEMS) {
-        position_in_hotbar++;
-    }
-    else if (teco::is_key_pressed(SDLK_e) and position_in_hotbar > 0) {
+    else if (teco::is_key_pressed(SDLK_q) and position_in_hotbar > 0) {
         position_in_hotbar--;
+    }
+    else if (teco::is_key_pressed(SDLK_e) and position_in_hotbar < HOTBAR_WIDTH_IN_ITEMS-1) { 
+        position_in_hotbar++;
     }
     else if (teco::is_key_pressed(SDLK_f) and hotbar[position_in_hotbar] != NOTHING) {
         switch (hotbar[position_in_hotbar]) {
@@ -219,7 +326,7 @@ void process_key_presses() {
                 break;
             case LENS:
                 break;
-            case MONSTER:
+            case CHUDISHCHE:
                 break;
         }
     }
@@ -227,6 +334,28 @@ void process_key_presses() {
 
 void tick_tock() {
 	process_key_presses();
+
+	hand.x = 1 + 17*position_in_hotbar;
+
+	for (int item_index = 0; item_index < HOTBAR_WIDTH_IN_ITEMS; item_index++) {
+		switch (hotbar[item_index]) {
+			case NOTHING:
+				item_sprites[item_index]->change(NOTHING);
+				break;
+			case BULB:
+				item_sprites[item_index]->change(BULB);
+				break;
+			case GLASSES:
+				item_sprites[item_index]->change(GLASSES);
+				break;
+			case LENS:
+				item_sprites[item_index]->change(LENS);
+				break;
+			case CHUDISHCHE:
+				item_sprites[item_index]->change(CHUDISHCHE);
+				break;
+		}
+	}
 
     for (Ship *ship : ships) {
         ship->tick();

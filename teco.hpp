@@ -309,7 +309,16 @@ void tick() {
 
 bool is_key_pressed(int key) {
     bool result = std::find(pressed_keys.begin(), pressed_keys.end(), key) != pressed_keys.end();
-    pressed_keys.clear();
+
+    if (result) {
+		for (int key_index = 0; key_index < pressed_keys.size(); key_index++) {
+			if (pressed_keys[key_index] == key) {
+				std::vector<int>::iterator key_iterator = pressed_keys.begin() + key_index;
+				pressed_keys.erase(key_iterator);
+			}
+		}
+	}
+
     return result;
 }
 
