@@ -235,9 +235,7 @@ class LightBeam {
 void process_key_presses();
 void tick_tock();
 
-
-int main() {
-	teco::Sprite waves {
+teco::Sprite waves {
     	1, 1,
     	std::vector<teco::Animation> {
         	teco::Animation {
@@ -283,13 +281,9 @@ int main() {
                 4
             }
         }
-    };
+};
 
-    for (int ship_index = 0; ship_index < 4; ship_index++){
-        ships.push_back(new Ship{});
-    }
-
-	teco::Sprite background {
+teco::Sprite background {
         0, 0,
         std::vector<teco::Animation> {
             teco::Animation {
@@ -301,9 +295,9 @@ int main() {
                 }
             }
         }
-    };
+};
 
-	teco::Sprite hand {
+teco::Sprite hand {
 		1, 48,
 		std::vector<teco::Animation> {
 			teco::Animation {
@@ -315,7 +309,12 @@ int main() {
 				}
 			}
 		}
-	};
+};
+
+int main() {
+    for (int ship_index = 0; ship_index < 4; ship_index++){
+        ships.push_back(new Ship{});
+    }
 
     srand(time(0));
 
