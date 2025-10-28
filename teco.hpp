@@ -28,7 +28,7 @@ TeCo - one-file-headder C++ terminal and gui game engine
 namespace teco {
 
 // functions inits
-void init(void (*) (), int, int, int, int);
+void init(void (*) (), int, int, int, int, const char[32]);
 void exit();
 void tick();
 
@@ -64,7 +64,24 @@ const int HEIGHT_IN_SYMBOLS = 56;
 const int WIDTH_PER_SYMBOL = 6;
 const int HEIGHT_PER_SYMBOL = 12;
 
-const char TITLE[] = "Wrangler";
+const SDL_Color COLORS[16] {
+    SDL_Color {229, 229, 229},
+    SDL_Color {160, 160, 160},
+    SDL_Color {6, 163, 143},
+    SDL_Color {5, 127, 113},
+    SDL_Color {168, 88, 175},
+    SDL_Color {103, 0, 154},
+    SDL_Color {42, 110, 192},
+    SDL_Color {22, 67, 124},
+    SDL_Color {202, 152, 16},
+    SDL_Color {176, 97, 7},
+    SDL_Color {135, 172, 0},
+    SDL_Color {94, 119, 0},
+    SDL_Color {174, 1, 0},
+    SDL_Color {124, 0, 27},
+    SDL_Color {103, 103, 103},
+    SDL_Color {0, 0, 0}
+};
 
 // variables
 int fps;
@@ -95,10 +112,9 @@ SDL_Window *window = NULL;
 SDL_Surface *window_surface = NULL;
 SDL_Surface *text_surface = NULL;
 TTF_Font *font = NULL;
-SDL_Color text_color = {229, 229, 229};
 SDL_Texture *text_texture = NULL;
 
-SDL_Texture *textures[32];
+SDL_Texture *symbol_textures[16][24];
 char symbols_to_prepare_textures_from_them[] = "+-_()'\"=|\\/~#$%&^*.,;:";
 
 // classes
@@ -209,21 +225,25 @@ Sprite::Sprite(int _x, int _y, std::vector<Animation> _animations) {
 class Screen {
 public:
 	char symbols[HEIGHT_IN_SYMBOLS][WIDTH_IN_SYMBOLS];
+	char colors[HEIGHT_IN_SYMBOLS][WIDTH_IN_SYMBOLS];
 
-	void add_sprite_sp(Sprite sprite) {
+	void add_sprite(Sprite sprite) {
         Source source = sprite.animations[sprite.current_animation_index].sources[sprite.current_frame_index];
+
+        add_array(source.symbols, symbols, sprite.y, sprite.x);
+        add_array(source.colors, colors, sprite.y, sprite.x);
+    }
         
-		for (int line = 0; line < source.symbols.size(); line++) {
-            for (int column = 0; column < source.symbols[line].size(); column++) {
-                int target_line = line + sprite.y;
-                int target_column = column + sprite.x;
+    void add_array(std::vector<std::string> array, char (&target)[HEIGHT_IN_SYMBOLS][WIDTH_IN_SYMBOLS], int offset_y, int offset_x) {
+        for (int line = 0; line < array.size(); line++) {
+            for (int column = 0; column < array[line].size(); column++) {
+                int target_line = line + offset_y;
+                int target_column = column + offset_x;
                 if (target_line >= 0 && target_line < HEIGHT_IN_SYMBOLS && 
                     target_column >= 0 && target_column < WIDTH_IN_SYMBOLS) {
-                    if (source.symbols[line][column] != ' ')
-                        symbols[target_line][target_column] = source.symbols[line][column];
+                    if (array[line][column] != ' ')
+                        target[target_line][target_column] = array[line][column];
                 }
-                // if (source.symbols[line][column] != ' ')
-				//     symbols[line+sprite.y][column+sprite.x] = source.symbols[line][column];
 			}
 		}
     }
@@ -240,7 +260,7 @@ public:
 Screen screen;
 
 // functions
-void init(void (*_tick_function) (), int _graphics_type = TUI, int _fps = 60, int _tps = 20, int _layer_count = 8) {
+void init(void (*_tick_function) (), int _graphics_type = TUI, int _fps = 60, int _tps = 20, int _layer_count = 8, const char _title[32] = "TeCo app") {
     graphics_type = _graphics_type;
     fps = _fps;
     tps = _tps;
@@ -254,7 +274,7 @@ void init(void (*_tick_function) (), int _graphics_type = TUI, int _fps = 60, in
     }
 
     window = SDL_CreateWindow(
-        TITLE,
+        _title,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         STANDARD_WINDOW_WIDTH, STANDARD_WINDOW_HEIGHT,
         SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE
@@ -287,14 +307,18 @@ void init(void (*_tick_function) (), int _graphics_type = TUI, int _fps = 60, in
     char temp_char[2];
     temp_char[1] = '\0';
 
-    for (int symbol_index = 0; symbol_index < strlen(symbols_to_prepare_textures_from_them); symbol_index++) {
-        temp_char[0] = symbols_to_prepare_textures_from_them[symbol_index];
-        text_surface = TTF_RenderText_Solid(font, temp_char, text_color);
-        textures[symbol_index] = SDL_CreateTextureFromSurface(
-            renderer,
-            text_surface
-        );
-        SDL_FreeSurface(text_surface);
+    for (int color = 0; color < 16; color++) {
+        SDL_Color text_color = COLORS[color];
+
+        for (int symbol_index = 0; symbol_index < strlen(symbols_to_prepare_textures_from_them); symbol_index++) {
+            temp_char[0] = symbols_to_prepare_textures_from_them[symbol_index];
+            text_surface = TTF_RenderText_Solid(font, temp_char, text_color);
+            symbol_textures[color][symbol_index] = SDL_CreateTextureFromSurface(
+                renderer,
+                text_surface
+            );
+            SDL_FreeSurface(text_surface);
+        }
     }
 }
 
@@ -372,16 +396,23 @@ void draw() {
     screen.clear();
 
 	for (auto sprite : sprites) {
-        screen.add_sprite_sp(*sprite);
+        screen.add_sprite(*sprite);
     }
 
 	char current_symbol[2];
 	current_symbol[1] = '\0';
 
+	char current_color[2];
+	current_color[1] = '\0';
+
 	for (int line = 0; line < teco::HEIGHT_IN_SYMBOLS; line++) {
 		for (int column = 0; column < teco::WIDTH_IN_SYMBOLS; column++) {
 			if (screen.symbols[line][column] != ' ') {
                 current_symbol[0] = screen.symbols[line][column];
+                current_color[0] = screen.colors[line][column];
+
+                int color = strtol(current_color, NULL, 16);
+                
                 if (strstr(symbols_to_prepare_textures_from_them, current_symbol)) {
                     const char *ptr = strchr(symbols_to_prepare_textures_from_them, screen.symbols[line][column]);
                     int index = ptr - symbols_to_prepare_textures_from_them;
@@ -392,9 +423,9 @@ void draw() {
                         window_width/WIDTH_IN_SYMBOLS, 
                         window_height/HEIGHT_IN_SYMBOLS
                     };
-                    SDL_RenderCopy(renderer, textures[index], NULL, &text_rectangle);
+                    SDL_RenderCopy(renderer, symbol_textures[color][index], NULL, &text_rectangle);
                 } else {
-                    text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
+                    text_surface = TTF_RenderText_Solid(font, current_symbol, COLORS[color]);
                     text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
                     SDL_FreeSurface(text_surface);
                     SDL_Rect text_rectangle = {

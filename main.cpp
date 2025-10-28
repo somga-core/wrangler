@@ -33,82 +33,6 @@ int position_in_hotbar = 0;
 
 int hotbar[HOTBAR_WIDTH_IN_ITEMS] = {0, 0, 1, 2, 1, 0};
 
-teco::Sprite background = teco::Sprite {
-    0, 0,
-    std::vector<teco::Animation> {
-        teco::Animation {
-            std::vector<teco::Source> {
-                teco::Source {
-                    "./assets/sources/gui/background/df.tcsb",
-                    "./assets/sources/empty.tccl"
-                }
-            }
-        }
-    }
-};
-
-teco::Sprite waves = teco::Sprite {
-    1, 1,
-    std::vector<teco::Animation> {
-        teco::Animation {
-            std::vector<teco::Source> {
-                teco::Source {
-                    "./assets/sources/gui/waves/df1.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df2.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df3.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df4.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df5.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df6.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df7.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df8.tcsb",
-                    "./assets/sources/empty.tccl"
-                },
-                teco::Source {
-                    "./assets/sources/gui/waves/df9.tcsb",
-                    "./assets/sources/empty.tccl"
-                }
-            },
-            teco::LOOPING,
-            4
-        }
-    }
-};
-
-teco::Sprite hand {
-	1, 48,
-	std::vector<teco::Animation> {
-		teco::Animation {
-			std::vector<teco::Source> {
-				teco::Source {
-					"assets/sources/gui/hand.tcsb",
-					"assets/sources/gui/hand.tccl"
-				}
-			}
-		}
-	}
-};
-
 class Ship {
 public:
     teco::Sprite *sprite;
@@ -308,6 +232,99 @@ class LightBeam {
 
 };
 
+void process_key_presses();
+void tick_tock();
+
+
+int main() {
+	teco::Sprite waves {
+    	1, 1,
+    	std::vector<teco::Animation> {
+        	teco::Animation {
+                std::vector<teco::Source> {
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr1.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr2.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr3.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr4.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr5.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr6.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr7.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr8.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr9.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    }
+                },
+                teco::LOOPING,
+                4
+            }
+        }
+    };
+
+    for (int ship_index = 0; ship_index < 4; ship_index++){
+        ships.push_back(new Ship{});
+    }
+
+	teco::Sprite background {
+        0, 0,
+        std::vector<teco::Animation> {
+            teco::Animation {
+                std::vector<teco::Source> {
+                    teco::Source {
+                        "./assets/sources/gui/background/df.tcsb",
+                        "./assets/sources/gui/background/df.tccl"
+                    }
+                }
+            }
+        }
+    };
+
+	teco::Sprite hand {
+		1, 48,
+		std::vector<teco::Animation> {
+			teco::Animation {
+				std::vector<teco::Source> {
+					teco::Source {
+						"assets/sources/gui/hand.tcsb",
+						"assets/sources/gui/hand.tccl"
+					}
+				}
+			}
+		}
+	};
+
+    srand(time(0));
+
+    teco::init(tick_tock, teco::TUI, 60, 20, 8, "Wrangler");
+
+    teco::mainloop();
+    return 0;
+}
+
 void process_key_presses() {
     if (teco::is_key_pressed(SDLK_BACKSPACE)) {
         teco::exit();
@@ -362,15 +379,3 @@ void tick_tock() {
     }
 }
 
-int main() {
-    srand(time(0));
-
-    teco::init(tick_tock, teco::TUI, 60, 20, 8);
-
-    for (int ship_index = 0; ship_index < 1; ship_index++){
-        ships.push_back(new Ship{});
-    }
-
-    teco::mainloop();
-    return 0;
-}
