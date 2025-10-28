@@ -76,7 +76,7 @@ public:
         right_point_y = SEA_Y_IN_SYMBOLS + rand() % SEA_HEIGHT_IN_SYMBOLS;
 
         speed = rand() % 100 + 50;
-        speed /= 150;
+        speed /= 200;
 
         float speed_coefficent = speed / hypot(left_point_y - right_point_y, SEA_WIDTH_IN_SYMBOLS);
 
@@ -185,7 +185,7 @@ void init_objects() {
         }
     };
 
-    for (int ship_index = 0; ship_index < 1; ship_index++){
+    for (int ship_index = 0; ship_index < 4; ship_index++){
         ships.push_back(new Ship{});
     }
 
