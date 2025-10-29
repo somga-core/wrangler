@@ -382,7 +382,7 @@ int main() {
 
     teco::init(tick_tock, teco::TUI, 60, 20, 8, "Wrangler");
 
-    for (int ship_index = 0; ship_index < 7777777; ship_index++){
+    for (int ship_index = 0; ship_index < 7; ship_index++){
         ships.push_back(new Ship{});
     }
 
