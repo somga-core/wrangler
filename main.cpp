@@ -58,16 +58,16 @@ public:
                 teco::Animation {
                     std::vector<teco::Source> {
                         teco::Source {
-                            "./assets/sources/ships/schooner/left/df.tcsb",
-                            "./assets/sources/empty.tccl"
+                            "./assets/sources/ships/schooner/left/cl.tcsb",
+                            "./assets/sources/ships/schooner/left/cl.tccl"
                         }
                     }
                 },
                 teco::Animation {
                     std::vector<teco::Source> {
                         teco::Source {
-                            "./assets/sources/ships/schooner/right/df.tcsb",
-                            "./assets/sources/empty.tccl"
+                            "./assets/sources/ships/schooner/right/cl.tcsb",
+                            "./assets/sources/ships/schooner/right/cl.tccl"
                         }
                     }
                 }
@@ -144,8 +144,8 @@ public:
 					teco::Animation {
 						std::vector<teco::Source> {
 						teco::Source {
-							"assets/sources/gui/hand.tcsb",
-							"assets/sources/gui/hand.tccl"
+							"assets/sources/items/bulb/df.tcsb",
+							"assets/sources/items/bulb/df.tccl"
 							}
 						}
 					}
@@ -156,8 +156,8 @@ public:
 					teco::Animation {
 						std::vector<teco::Source> {
 						teco::Source {
-							"assets/sources/gui/hand.tcsb",
-							"assets/sources/gui/hand.tccl"
+							"assets/sources/items/glasses/df.tcsb",
+							"assets/sources/items/glasses/df.tccl"
 							}
 						}
 					}
@@ -168,8 +168,8 @@ public:
 					teco::Animation {
 						std::vector<teco::Source> {
 						teco::Source {
-							"assets/sources/gui/hand.tcsb",
-							"assets/sources/gui/hand.tccl"
+							"assets/sources/items/lens/df.tcsb",
+							"assets/sources/items/lens/df.tccl"
 							}
 						}
 					}
@@ -180,8 +180,8 @@ public:
 					teco::Animation {
 						std::vector<teco::Source> {
 						teco::Source {
-							"assets/sources/gui/hand.tcsb",
-							"assets/sources/gui/hand.tccl"
+							"assets/sources/items/chudishche/df.tcsb",
+							"assets/sources/items/chudishche/df.tccl"
 							}
 						}
 					}
@@ -312,13 +312,13 @@ teco::Sprite hand {
 };
 
 int main() {
-    for (int ship_index = 0; ship_index < 4; ship_index++){
-        ships.push_back(new Ship{});
-    }
-
     srand(time(0));
 
     teco::init(tick_tock, teco::TUI, 60, 20, 8, "Wrangler");
+
+    for (int ship_index = 0; ship_index < 4; ship_index++){
+        ships.push_back(new Ship{});
+    }
 
     teco::mainloop();
     return 0;
