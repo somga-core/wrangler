@@ -194,9 +194,11 @@ public:
 		if (
 			//(light_beam.sprite->x <= x or light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) and
 			//(light_beam.sprite->y <= y or light_beam.sprite->y+5 <= y + SHIP_HEIGHT_IN_SYMBOLS)
-			!(light_beam.sprite->x+7 < SHIP_WIDTH_IN_SYMBOLS or x+SHIP_WIDTH_IN_SYMBOLS < light_beam.sprite->x or
-			light_beam.sprite->y+5 < SHIP_HEIGHT_IN_SYMBOLS or y+SHIP_HEIGHT_IN_SYMBOLS < light_beam.sprite->y)
-			//(light_beam.sprite->x <= x or
+			
+			//!(light_beam.sprite->x+7 < SHIP_WIDTH_IN_SYMBOLS or x+SHIP_WIDTH_IN_SYMBOLS < light_beam.sprite->x or
+			//light_beam.sprite->y+5 < SHIP_HEIGHT_IN_SYMBOLS or y+SHIP_HEIGHT_IN_SYMBOLS < light_beam.sprite->y)
+			
+			abs(light_beam.sprite->x - x) < 7 and abs(light_beam.sprite->y - y) < 5
 		) {
 			is_wrangled = true;
 			std::cout << "rrrrrrrr" << std::endl;
@@ -453,7 +455,7 @@ void tick_tock() {
 
     for (Ship *ship : ships) {
         ship->tick();
-		std::cout << ship->wrangle_counter << std::endl
+		std::cout << ship->wrangle_counter << " "
 			<< ship->is_wrangled << std::endl;
 		if (ship->ready_to_delete == 1) {
 			ship->sprite->x = 1000;
