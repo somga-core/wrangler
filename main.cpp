@@ -22,22 +22,106 @@ const int SHIP_HEIGHT_IN_SYMBOLS = 5;
 const int HARBOR_X = 1;
 const int HARBOR_Y = 1;
 
-const int SEA_HEIGHT_IN_SYMBOLS = 42;
-const int SEA_WIDTH_IN_SYMBOLS = 192;
+const int SEA_HEIGHT_IN_SYMBOLS = 46;
+const int SEA_WIDTH_IN_SYMBOLS = 117;
 
 const int SEA_X_IN_SYMBOLS = 1;
 const int SEA_Y_IN_SYMBOLS = 1;
+
+const int BULB_FACTOR = 5;
 
 const int HOTBAR_HEIGHT_IN_SYMBOLS = teco::HEIGHT_IN_SYMBOLS - SEA_HEIGHT_IN_SYMBOLS;
 int position_in_hotbar = 0;
 
 int hotbar[HOTBAR_WIDTH_IN_ITEMS] = {0, 0, 1, 2, 1, 0};
 
+int forfeit_ships = 0;
+
+teco::Sprite waves {
+    	1, 1,
+    	std::vector<teco::Animation> {
+        	teco::Animation {
+                std::vector<teco::Source> {
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr1.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr2.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr3.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr4.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr5.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr6.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr7.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr8.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    },
+                    teco::Source {
+                        "./assets/sources/gui/waves/fr9.tcsb",
+                        "./assets/sources/gui/waves/df.tccl"
+                    }
+                },
+                teco::LOOPING,
+                4
+            }
+        }
+};
+
+
+
+class LightBeam {
+public:
+	teco::Sprite *sprite;
+
+	LightBeam() {
+		sprite = new teco::Sprite {
+			1, 1,
+			std::vector<teco::Animation> {
+				teco::Animation {
+					std::vector<teco::Source> {
+						teco::Source {
+							"assets/sources/light_beam/df.tcsb",
+							"assets/sources/light_beam/df.tccl"
+						}
+					}
+				}
+			}
+		};
+	}
+
+	~LightBeam() {
+		delete sprite;
+	}
+};
+
+LightBeam light_beam;
+
 class Ship {
 public:
     teco::Sprite *sprite;
     
     int is_turned_right = 0;
+	int current_is_turned_right = 0;
+
+	int wrangle_counter = 0;
 
     float speed_x;
     float speed_y;
@@ -49,7 +133,7 @@ public:
     int left_point_y;
     int right_point_y;
 
-    bool is_wrangled = false;
+    bool is_wrangled = true;
 
     Ship() {
         sprite = new teco::Sprite {
@@ -74,8 +158,8 @@ public:
             }
         };
 
-        left_point_y = SEA_Y_IN_SYMBOLS + rand() % SEA_HEIGHT_IN_SYMBOLS;
-        right_point_y = SEA_Y_IN_SYMBOLS + rand() % SEA_HEIGHT_IN_SYMBOLS;
+        left_point_y = SEA_Y_IN_SYMBOLS + rand() % (SEA_HEIGHT_IN_SYMBOLS-SHIP_HEIGHT_IN_SYMBOLS);
+        right_point_y = SEA_Y_IN_SYMBOLS + rand() % (SEA_HEIGHT_IN_SYMBOLS-SHIP_HEIGHT_IN_SYMBOLS);
 
         speed = rand() % 100 + 50;
         speed /= 150;
@@ -90,13 +174,13 @@ public:
         if (is_turned_right) {
             sprite->play_animation(1);
             y = left_point_y;
-            x = SEA_X_IN_SYMBOLS - SHIP_WIDTH_IN_SYMBOLS;
+            x = SEA_X_IN_SYMBOLS;
         } else {
             sprite->play_animation(0);
-            speed_x = -speed_x;
+			speed_x = -speed_x;
             speed_y = -speed_y;
             y = right_point_y;
-            x = SEA_X_IN_SYMBOLS + SEA_WIDTH_IN_SYMBOLS;
+            x = SEA_X_IN_SYMBOLS + SEA_WIDTH_IN_SYMBOLS - SHIP_WIDTH_IN_SYMBOLS;
         }
     }
 
@@ -105,13 +189,37 @@ public:
 	}
 
     void tick() {
-        if (!is_wrangled) {
-            x += speed_x;
-            y += speed_y;
-        }
+		if (
+			(light_beam.sprite->x <= x and light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) and
+			(light_beam.sprite->y <= y and light_beam.sprite->y+5 <= y + SHIP_HEIGHT_IN_SYMBOLS)
+		) {
+			is_wrangled = true;
+		}
+		else {
+			is_wrangled = false;
+		}
 
+		if (is_wrangled)
+			wrangle_counter++;
+
+		if (
+			((is_turned_right and x < 104) or (!is_turned_right and x > 2)) and
+			((speed_y > 0 and y > 2) or (speed_y <= 0 and y < 40))
+		) {
+			x += speed_x;
+			y += speed_y;
+		}
+		else {
+			//delete
+		}
+		
         sprite->x = x;
         sprite->y = y;
+
+		if (wrangle_counter >= 20) {
+			//delete
+			std::cout << "eee" << std::endl;
+		}
     }
 };
 
@@ -228,60 +336,9 @@ class Background {
 
 };
 
-class LightBeam {
-
-};
-
 void process_key_presses();
 void tick_tock();
 
-teco::Sprite waves {
-    	1, 1,
-    	std::vector<teco::Animation> {
-        	teco::Animation {
-                std::vector<teco::Source> {
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr1.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr2.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr3.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr4.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr5.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr6.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr7.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr8.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    },
-                    teco::Source {
-                        "./assets/sources/gui/waves/fr9.tcsb",
-                        "./assets/sources/gui/waves/df.tccl"
-                    }
-                },
-                teco::LOOPING,
-                4
-            }
-        }
-};
 
 teco::Sprite background {
         0, 0,
@@ -327,6 +384,18 @@ int main() {
 void process_key_presses() {
     if (teco::is_key_pressed(SDLK_BACKSPACE)) {
         teco::exit();
+	}
+	else if (teco::is_key_pressed(SDLK_w) and light_beam.sprite->y > SEA_X_IN_SYMBOLS) {
+		light_beam.sprite->y--;
+	}
+	else if (teco::is_key_pressed(SDLK_a) and light_beam.sprite->x > SEA_Y_IN_SYMBOLS) {
+		light_beam.sprite->x--;
+	}
+	else if (teco::is_key_pressed(SDLK_s) and light_beam.sprite->y < SEA_Y_IN_SYMBOLS + SEA_HEIGHT_IN_SYMBOLS - 5 /*42*/) {
+		light_beam.sprite->y++;
+	}
+	else if (teco::is_key_pressed(SDLK_d) and light_beam.sprite->x < SEA_X_IN_SYMBOLS + SEA_WIDTH_IN_SYMBOLS - 9 /*109*/) {
+		light_beam.sprite->x++;
 	}
     else if (teco::is_key_pressed(SDLK_q) and position_in_hotbar > 0) {
         position_in_hotbar--;
