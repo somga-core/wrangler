@@ -36,6 +36,7 @@ int position_in_hotbar = 0;
 int hotbar[HOTBAR_WIDTH_IN_ITEMS] = {0, 0, 1, 2, 1, 0};
 
 int forfeit_ships = 0;
+int score = 0;
 
 teco::Sprite waves {
     	1, 1,
@@ -119,9 +120,9 @@ public:
     teco::Sprite *sprite;
     
     int is_turned_right = 0;
-	int current_is_turned_right = 0;
-
+	int is_correct = 1;
 	int wrangle_counter = 0;
+	int ready_to_delete = 0;
 
     float speed_x;
     float speed_y;
@@ -133,7 +134,7 @@ public:
     int left_point_y;
     int right_point_y;
 
-    bool is_wrangled = true;
+    bool is_wrangled = false;
 
     Ship() {
         sprite = new teco::Sprite {
@@ -170,6 +171,7 @@ public:
         speed_x = (SEA_WIDTH_IN_SYMBOLS) * speed_coefficent;
 
         is_turned_right = rand() % 2;
+		is_correct = rand() % 2;
 
         if (is_turned_right) {
             sprite->play_animation(1);
@@ -190,7 +192,7 @@ public:
 
     void tick() {
 		if (
-			(light_beam.sprite->x <= x and light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) and
+			(light_beam.sprite->x <= x and light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) or
 			(light_beam.sprite->y <= y and light_beam.sprite->y+5 <= y + SHIP_HEIGHT_IN_SYMBOLS)
 		) {
 			is_wrangled = true;
@@ -211,14 +213,17 @@ public:
 		}
 		else {
 			//delete
+			ready_to_delete = 1;
 		}
 		
         sprite->x = x;
         sprite->y = y;
 
-		if (wrangle_counter >= 20) {
-			//delete
-			std::cout << "eee" << std::endl;
+		if (wrangle_counter >= 100) {
+			ready_to_delete = 1;
+			score++;
+			std::cout << score << std::endl;
+			wrangle_counter = 0;
 		}
     }
 };
@@ -373,7 +378,7 @@ int main() {
 
     teco::init(tick_tock, teco::TUI, 60, 20, 8, "Wrangler");
 
-    for (int ship_index = 0; ship_index < 4; ship_index++){
+    for (int ship_index = 0; ship_index < 9; ship_index++){
         ships.push_back(new Ship{});
     }
 
@@ -386,16 +391,16 @@ void process_key_presses() {
         teco::exit();
 	}
 	else if (teco::is_key_pressed(SDLK_w) and light_beam.sprite->y > SEA_X_IN_SYMBOLS) {
-		light_beam.sprite->y--;
+		light_beam.sprite->y-=3;
 	}
 	else if (teco::is_key_pressed(SDLK_a) and light_beam.sprite->x > SEA_Y_IN_SYMBOLS) {
-		light_beam.sprite->x--;
+		light_beam.sprite->x-=3;
 	}
 	else if (teco::is_key_pressed(SDLK_s) and light_beam.sprite->y < SEA_Y_IN_SYMBOLS + SEA_HEIGHT_IN_SYMBOLS - 5 /*42*/) {
-		light_beam.sprite->y++;
+		light_beam.sprite->y+=3;
 	}
 	else if (teco::is_key_pressed(SDLK_d) and light_beam.sprite->x < SEA_X_IN_SYMBOLS + SEA_WIDTH_IN_SYMBOLS - 9 /*109*/) {
-		light_beam.sprite->x++;
+		light_beam.sprite->x+=3;
 	}
     else if (teco::is_key_pressed(SDLK_q) and position_in_hotbar > 0) {
         position_in_hotbar--;
@@ -444,6 +449,10 @@ void tick_tock() {
 
     for (Ship *ship : ships) {
         ship->tick();
+		if (ship->ready_to_delete == 1) {
+			ship->sprite->x = 1000;
+			ship->sprite->y = 1000;
+		}
     }
 }
 
