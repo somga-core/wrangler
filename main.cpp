@@ -163,7 +163,7 @@ public:
         right_point_y = SEA_Y_IN_SYMBOLS + rand() % (SEA_HEIGHT_IN_SYMBOLS-SHIP_HEIGHT_IN_SYMBOLS);
 
         speed = rand() % 100 + 50;
-        speed /= 150;
+        speed /= 450;
 
         float speed_coefficent = speed / hypot(left_point_y - right_point_y, SEA_WIDTH_IN_SYMBOLS);
 
@@ -192,17 +192,22 @@ public:
 
     void tick() {
 		if (
-			(light_beam.sprite->x <= x and light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) or
-			(light_beam.sprite->y <= y and light_beam.sprite->y+5 <= y + SHIP_HEIGHT_IN_SYMBOLS)
+			//(light_beam.sprite->x <= x or light_beam.sprite->x+7 <= x + SHIP_WIDTH_IN_SYMBOLS) and
+			//(light_beam.sprite->y <= y or light_beam.sprite->y+5 <= y + SHIP_HEIGHT_IN_SYMBOLS)
+			!(light_beam.sprite->x+7 < SHIP_WIDTH_IN_SYMBOLS or x+SHIP_WIDTH_IN_SYMBOLS < light_beam.sprite->x or
+			light_beam.sprite->y+5 < SHIP_HEIGHT_IN_SYMBOLS or y+SHIP_HEIGHT_IN_SYMBOLS < light_beam.sprite->y)
+			//(light_beam.sprite->x <= x or
 		) {
 			is_wrangled = true;
+			std::cout << "rrrrrrrr" << std::endl;
 		}
 		else {
 			is_wrangled = false;
 		}
 
-		if (is_wrangled)
+		if (is_wrangled) {
 			wrangle_counter++;
+		}
 
 		if (
 			((is_turned_right and x < 104) or (!is_turned_right and x > 2)) and
@@ -222,7 +227,6 @@ public:
 		if (wrangle_counter >= 100) {
 			ready_to_delete = 1;
 			score++;
-			std::cout << score << std::endl;
 			wrangle_counter = 0;
 		}
     }
@@ -378,7 +382,7 @@ int main() {
 
     teco::init(tick_tock, teco::TUI, 60, 20, 8, "Wrangler");
 
-    for (int ship_index = 0; ship_index < 9; ship_index++){
+    for (int ship_index = 0; ship_index < 7777777; ship_index++){
         ships.push_back(new Ship{});
     }
 
@@ -449,6 +453,8 @@ void tick_tock() {
 
     for (Ship *ship : ships) {
         ship->tick();
+		std::cout << ship->wrangle_counter << std::endl
+			<< ship->is_wrangled << std::endl;
 		if (ship->ready_to_delete == 1) {
 			ship->sprite->x = 1000;
 			ship->sprite->y = 1000;
