@@ -10,7 +10,7 @@
 int main() {
 	srand(time(0));
 
-	teco::init(&main_gameplay_screen, "Wrangler");
+	teco::init(&main_gameplay::screen, "Wrangler");
 	teco::init_gui();
 	teco::mainloop_gui();
 
