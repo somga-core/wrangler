@@ -46,7 +46,7 @@ class Ship {
 	int right_point_y;
 
 	Ship();
-	void (*tick)();
+	void tick();
 };
 
 teco::Screen main_screen;
@@ -62,6 +62,12 @@ teco::Sprite light_beam_sprite;
 teco::Sprite background_sprite;
 teco::Sprite hand_sprite;
 
+teco::Sprite nothing_sprite;
+teco::Sprite bulb_sprite;
+teco::Sprite glasses_sprite;
+teco::Sprite lens_sprite;
+teco::Sprite chudishche_sprite;
+
 LightBeam light_beam;
 
 int position_in_hotbar;
@@ -73,6 +79,8 @@ int forfeit_ships;
 std::vector<Ship*> ships;
 
 void process_keypresses();
+
+bool do_intersect(int xa, int ya, int xb, int yb);
 
 void main_tick();
 void main_draw();
@@ -149,14 +157,29 @@ light_beam_sprite = teco::Sprite(
 
 hand_sprite = teco::Sprite(
 	std::vector<teco::Animation> {
-		teco::Animation {
+		teco::Animation(
 			std::vector<teco::Source> {
-				teco::Source {
+				teco::Source(
 					"assets/sources/gui/hand.tcsb",
 					"assets/sources/gui/hand.tccl"
-				}
+					"assets/sources/gui/hand.tcsb"
+				)
 			}
-		}
+		)
+	}
+);
+
+nothing_sprite = teco::Sprite(
+	std::vector<teco::Animation> {
+		teco::Animation(
+			std::vector<teco::Source> {
+				teco::Source(
+					"assets/sources/empty.tcsb",
+					"assets/sources/empty.tccl",
+					"assets/sources/empty.tcsb"
+				)
+			}
+		)
 	}
 );
 
@@ -196,6 +219,39 @@ Ship::Ship() {
 		x = sea.width - width;
 		y = right_point_y;
 	}
+}
+
+void Ship::tick() {
+	if (do_intersect(x, y, width, height, light_beam.x, light_beam.y, light_beam.width, light_beam.height)) {
+		wrangle_counter++;
+	}
+
+	if (
+		(is_turned_right and x < sea.width or !is_turned_right and x > 0) and
+		(speed_y > 0 and y > 0 or speed_y <= 0 and y < sea.height)
+	) {
+		x += speed_x;
+		y += speed_y;
+	}
+	else {
+		// delete
+		ready_to_delete = 1;
+	}
+
+	if (wrangle_counter >= 100) {
+		ready_to_delete = 1;
+		score++;
+		wrangle_counter = 0;
+	}
+}
+
+bool do_intersect(int xa, int ya, int wa, int ha, int xb, int yb, int wb, int hb) {
+	return (
+		(abs(xa - xb) < wa and abs(ya - yb) < ha) or
+		(abs(xa - xb) < wb and abs(ya - yb) < ha) or
+		(abs(xa - xb) < wa and abs(ya - yb) < hb) or
+		(abs(xa - xb) < wb and abs(ya - yb) < hb)
+	);
 }
 
 void main_tick() {
