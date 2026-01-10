@@ -30,6 +30,8 @@ teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode, int _ti
 	ticks_per_frame = _ticks_per_frame;
 }
 
+teco::Sprite::Sprite() {};
+
 teco::Sprite::Sprite(std::vector<Animation> _animations, int _current_animation_index, int _current_animation_frame_index) {
 	animations = _animations;
 
@@ -76,6 +78,8 @@ void teco::Sprite::update_animations() {
 		current_animation_tick = 0;
 	}
 }
+
+teco::Screen::Screen() {};
 
 teco::Screen::Screen(int _width, int _height, void (*_tick) (), void (*_draw) ()) {
 	width = _width;
@@ -130,13 +134,10 @@ void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>>& symbol
 // variables
 std::string teco::title;
 
-int tick_count;
+unsigned long long teco::tick_count;
 
 int teco::fps;
 int teco::tps;
-
-int teco::window_width_in_symbols;
-int teco::window_height_in_symbols;
 
 std::vector<char> teco::pressed_keys;
 

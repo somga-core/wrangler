@@ -70,7 +70,8 @@ public:
 	int current_animation_frame_index;
     int current_animation_tick;
     bool is_playing_animations;
-
+	
+	Sprite();
 	Sprite(std::vector<Animation> _animations, int _currrent_animation_index = 0, int _current_animation_frame_index = 0);
 	void set_animation(int animation_index);
 	void force_animation(int animation_index);
@@ -89,6 +90,7 @@ public:
 	void (*tick) ();
 	void (*draw) ();
 
+	Screen();
 	Screen(int _width, int _height, void (*_tick) (), void (*_draw) ());
 	void clear();
 	void draw_source(int x, int y, Source& source_to_draw);
@@ -101,13 +103,10 @@ public:
 // variables
 extern std::string title;
 
-extern int tick_count;
+extern unsigned long long tick_count;
 
 extern int fps;
 extern int tps;
-
-extern int window_width_in_symbols;
-extern int window_height_in_symbols;
 
 extern std::vector<char> pressed_keys;
 
