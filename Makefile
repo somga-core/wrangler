@@ -1,18 +1,28 @@
 CC=g++
-FLAGS=-lSDL2 -lSDL2_ttf
 INPUT=./main.cpp
 OUTPUT=./exc
 
+GUI_FLAGS=-lSDL2 -lSDL2_ttf 
+TUI_FLAGS=-lncurses
+
+TECO_ENGINE=./teco/teco_engine.cpp
+TECO_GUI=./teco/teco_gui.cpp
+TECO_TUI=./teco/teco_tui.cpp
+
 RMCOMMAND=rm -f
 
-.PHONY: clean build
+.PHONY: all gui tui run clean
 
-all: clean build
+all: clean 
+	$(CC) -o $(OUTPUT) $(INPUT) $(TECO_ENGINE) $(TECO_GUI) $(TECO_TUI) $(GUI_FLAGS) $(TUI_FLAGS)
 
-build:
-	$(CC) -o $(OUTPUT) $(INPUT) $(FLAGS)
+gui: clean
+	$(CC) -o $(OUTPUT) $(INPUT) $(TECO_ENGINE) $(TECO_GUI) $(GUI_FLAGS)
 
-run: all
+tui: clean
+	$(CC) -o $(OUTPUT) $(INPUT) $(TECO_ENGINE) $(TECO_TUI) $(TUI_FLAGS)
+
+run:
 	$(OUTPUT)
 
 clean:
